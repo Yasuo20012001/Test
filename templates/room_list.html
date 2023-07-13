@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Room List</h1>
+<!-- Display the list of rooms with filtering and sorting options -->
+
+<form method="GET">
+  <div class="form-row">
+    <div class="form-group col-md-4">
+      <label for="check_in_date">Check in date:</label>
+      <input type="date" id="check_in_date" name="check_in_date" class="form-control">
+    </div>
+    <div class="form-group col-md-4">
+      <label for="check_out_date">Check out date:</label>
+      <input type="date" id="check_out_date" name="check_out_date" class="form-control">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-4">
+      <label for="sort-by">Sort By:</label>
+      <select id="sort-by" name="sort_by" class="form-control">
+        <option value="">None</option>
+        <option value="price">Price</option>
+        <option value="capacity">Capacity</option>
+      </select>
+    </div>
+    <div class="form-group col-md-4">
+      <label for="sort-order">Sort Order:</label>
+      <select id="sort-order" name="sort_order" class="form-control">
+        <option value="asc">Ascending</option>
+        <option value="desc">Descending</option>
+      </select>
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Room Number</th>
+      <th scope="col">Price</th>
+      <th scope="col">Capacity</th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <tbody id="room-list-body">
+    {% for room in rooms %}
+    <tr>
+      <td>{{ room.room }}</td>
+      <td>{{ room.price }}</td>
+      <td>{{ room.capacity }}</td>
+      <td>
+        {% if request.user.is_authenticated %}
+        <button class="btn btn-success book-btn" data-room-id="{{ room.id }}">Book</button>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  $(document).ready(function () {
+    // Function to fetch room data
+    function fetchRoomData() {
+      $.ajax({
+          url: '/api/rooms/',
+          method: 'GET',
+          data: {
+            check_in_date: $('#check_in_date').val(),
+            check_out_date: $('#check_out_date').val(),
+            sort_by: $('#sort-by').val(),
+            sort_order: $('#sort-order').val() // Add the selected sort order to the request data
+          },
+        success: function (response) {
+          const rooms = response;
+const isAuthenticated = {{ request.user.is_authenticated|lower }};
+
+          // Clear the existing table rows
+          $('#room-list-body').empty();
+
+          for (let i = 0; i < rooms.length; i++) {
+            const room = rooms[i];
+            let row = '<tr>' +
+              '<td>' + room.room + '</td>' +
+              '<td>' + room.price + '</td>' +
+              '<td>' + room.capacity + '</td>';
+
+            // Add the book button only for authenticated users
+            if (isAuthenticated) {
+              row += '<td>' + '<button class="btn btn-success book-btn" data-room-id="' + room.id + '">Book</button>' + '</td>';
+            } else {
+              row += '<td></td>'; // Add an empty cell for non-authenticated users
+            }
+
+            row += '</tr>';
+            const $row = $(row);
+            $row.find('.book-btn').click(function () {
+              const roomId = $(this).data('room-id');
+              const checkInDate = $('#check_in_date').val();
+              const checkOutDate = $('#check_out_date').val();
+
+              bookRoom(roomId, checkInDate, checkOutDate);
+            });
+
+            $('#room-list-body').append($row);
+          }
+        },
+        error: function (xhr, textStatus, error) {
+          console.log(xhr.responseText);
+          alert('Failed to fetch room data!');
+        }
+      });
+    }
+
+    // Fetch room data when the page loads
+    fetchRoomData();
+
+    // Add event listener to the Filter button
+    $('form').submit(function (event) {
+      event.preventDefault(); // Prevent the form from submitting
+
+      // Fetch room data with the applied filters
+      fetchRoomData();
+    });
+
+    function bookRoom(roomId, checkInDate, checkOutDate) {
+      if (!checkInDate || !checkOutDate) {
+        alert('Please enter check-in and check-out dates.');
+        return;
+      }
+      console.log('Booking room with id: ' + roomId);
+      $.ajax({
+        url: `/api/rooms/book/${roomId}/`,
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken') // Include the CSRF token in the request headers
+        },
+        method: 'POST',
+        data: JSON.stringify({
+          check_in_date: checkInDate,
+          check_out_date: checkOutDate
+        }),
+        contentType: 'application/json',
+        success: function (response) {
+          alert('Room booked!');
+          // Redirect to the reservation list page
+          window.location.href = '/reservations/';
+        },
+        error: function (xhr, textStatus, error) {
+          console.log(xhr.responseText);
+          alert('Failed to book the room!');
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

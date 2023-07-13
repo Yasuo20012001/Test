@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Website</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="menu-list">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        {% if not request.user.is_authenticated %}
+        <li class="nav-item">
+            <a class="nav-link" href="/login/">Login</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/registration/">Registration</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+            <a class="nav-link" href="/rooms/">Rooms</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/reservations/">My Reservations</a>
+        </li>
+        <li class="nav-item">
+            <form id="logoutForm" method="post" action="/api/logout/">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Logout</button>
+            </form>
+        </li>
+        {% endif %}
+        </ul>
+    </nav>
+</div>
+
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const csrftoken = getCookie('csrftoken');  // Get the CSRF token from cookies
+        $('#logoutForm').submit(function (event) {
+            event.preventDefault();
+
+            $.ajax({
+                url: '/api/logout/',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken  // Include the CSRF token in the request headers
+                },
+                success: function (response) {
+                    console.log(response);
+                    alert('Logout successful!');
+                    window.location.href = '/rooms'; // Redirect to the home page or any desired location
+                },
+                error: function (xhr, textStatus, error) {
+                    console.log(xhr.responseText);
+                    alert('Logout failed!');
+                }
+            });
+        });
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+</body>
+</html>
