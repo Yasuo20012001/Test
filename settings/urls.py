@@ -19,8 +19,10 @@ from django.contrib.auth.decorators import login_required
 from django.urls import path
 from django.views.generic import TemplateView
 
-from apps.room_booking.views import UserRegistrationAPIView, RoomListAPIView, BookRoomAPIView, \
-    CancelReservationAPIView, LogoutAPIView, UserLoginAPIView, UserReservationsAPIView
+from apps.room_booking.views import (BookRoomAPIView, CancelReservationAPIView,
+                                     LogoutAPIView, RoomListAPIView,
+                                     UserLoginAPIView, UserRegistrationAPIView,
+                                     UserReservationsAPIView)
 
 urlpatterns = [
     path('admin/', admin.site.urls),  # Django admin URL

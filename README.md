@@ -1,7 +1,9 @@
 # Room_Booking_test
 
 ## Technical Requirements for this Project:
+
 Requirements:
+
 * For rooms, there should be fields: number/name, price, capacity.
 * Users should be able to filter and sort rooms by price and capacity.
 * Users must be able to search for free rooms during a given time interval.
@@ -11,12 +13,14 @@ Requirements:
 * Users must be able to register and log in.
 * Users must be logged in to book a room.
 * Authorized users must see their reservations, while unregistered users can view rooms without login.
+
 ### Stack:
+
 * Django;
 * Django Rest Framework;
 * PostgreSQL database is preferred, but not required.SQLite is also acceptable.
-
-
+* Docker
+* API
 
 ### This project was realized using the Django framework and the Django Rest Framework.
 
@@ -31,7 +35,6 @@ Requirements:
 ### Create a Super User for Both Services in Each Service Console with the Following Commands:
 
 * For room_booking service in the terminal - python3 manage.py createsuperuser
-
 
 ### With the existing .env:
 

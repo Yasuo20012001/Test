@@ -1,11 +1,13 @@
 from django.contrib import admin
 
-from apps.room_booking.models import Room, Reservation
+from apps.room_booking.models import Reservation, Room
+
 
 # Register your models here.
 class RoomAdmin(admin.ModelAdmin):
     list_display = ('room', 'price', 'capacity')
     search_fields = ('number',)
+
 
 # @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
